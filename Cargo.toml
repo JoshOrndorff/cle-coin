@@ -5,7 +5,7 @@ panic = 'unwind'
 authors = ['Anonymous']
 build = 'build.rs'
 edition = '2018'
-name = 'node-template'
+name = 'CLE-coin'
 version = '2.0.0'
 
 [build-dependencies]
@@ -48,8 +48,9 @@ package = 'sp-finality-grandpa'
 rev = '3e651110aa06aa835790df63410a29676243fc54'
 version = '2.0.0'
 
-[dependencies.node-template-runtime]
+[dependencies.runtime]
 path = 'runtime'
+package = 'cle-coin-runtime'
 version = '2.0.0'
 
 [dependencies.sc-basic-authority]

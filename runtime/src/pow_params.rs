@@ -1,66 +1,60 @@
-/// A runtime module template with necessary imports
-
-/// Feel free to remove or edit this file as needed.
-/// If you change the name of this file, make sure to update its references in runtime/src/lib.rs
-/// If you remove this file, you can remove those references
-
-
-/// For more guidance on Substrate modules, see the example module
-/// https://github.com/paritytech/substrate/blob/master/frame/example/src/lib.rs
+/// A Pallet that controls two basic parameters of PoW blockchains through
+/// on-chain governance.
+///
+/// The parameters controlled are:
+/// * Difficulty
+/// * BlockReward
 
 use frame_support::{decl_module, decl_storage, decl_event, dispatch::DispatchResult};
-use system::ensure_signed;
+use system::ensure_root;
+use sp_core::U256;
+use frame_support::traits::Currency;
 
-/// The module's configuration trait.
 pub trait Trait: system::Trait {
-	// TODO: Add other types and constants required configure this module.
-
-	/// The overarching event type.
 	type Event: From<Event<Self>> + Into<<Self as system::Trait>::Event>;
+	type RewardCurrency: Currency<Self::AccountId>;
 }
 
-// This module's storage items.
+type BalanceOf<T> = <<T as Trait>::RewardCurrency as Currency<<T as system::Trait>::AccountId>>::Balance;
+
 decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
-		// Just a dummy storage item.
-		// Here we are declaring a StorageValue, `Something` as a Option<u32>
-		// `get(fn something)` is the default getter which returns either the stored `u32` or `None` if nothing stored
-		Something get(fn something): Option<u32>;
+		Difficulty get(fn difficulty) config(): U256 = 200.into();
+		Reward get(fn reward) config(): BalanceOf<T> = 1.into();
 	}
 }
 
-// The module's dispatchable functions.
 decl_module! {
 	/// The module declaration.
 	pub struct Module<T: Trait> for enum Call where origin: T::Origin {
-		// Initializing events
-		// this is needed only if you are using events in your module
 		fn deposit_event() = default;
 
-		// Just a dummy entry point.
-		// function that can be called by the external world as an extrinsics call
-		// takes a parameter of the type `AccountId`, stores it and emits an event
-		pub fn do_something(origin, something: u32) -> DispatchResult {
-			// TODO: You only need this if you want to check it was signed.
-			let who = ensure_signed(origin)?;
+		pub fn set_difficulty(origin, new_difficulty: U256) -> DispatchResult {
+			ensure_root(origin)?;
 
-			// TODO: Code to execute when something calls this.
-			// For example: the following line stores the passed in u32 in the storage
-			Something::put(something);
+			Difficulty::put(new_difficulty);
 
-			// here we are raising the Something event
-			Self::deposit_event(RawEvent::SomethingStored(something, who));
+			Self::deposit_event(RawEvent::DifficultySet(new_difficulty));
+			Ok(())
+		}
+
+		pub fn set_reward(origin, new_reward: BalanceOf<T>) -> DispatchResult {
+			ensure_root(origin)?;
+
+			Reward::<T>::put(new_reward);
+
+			Self::deposit_event(RawEvent::RewardSet(new_reward));
 			Ok(())
 		}
 	}
 }
 
 decl_event!(
-	pub enum Event<T> where AccountId = <T as system::Trait>::AccountId {
-		// Just a dummy event.
-		// Event `Something` is declared with a parameter of the type `u32` and `AccountId`
-		// To emit this event, we call the deposit funtion, from our runtime funtions
-		SomethingStored(u32, AccountId),
+	pub enum Event<T> where Balance = BalanceOf<T> {
+		/// The PoW Difficulty has been set
+		DifficultySet(U256),
+		/// The Block Reward has bee nset
+		RewardSet(Balance),
 	}
 );
 
