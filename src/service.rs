@@ -32,7 +32,6 @@ construct_simple_protocol! {
 /// be able to perform chain operations.
 macro_rules! new_full_start {
 	($config:expr) => {{
-		let mut import_setup = None;
 		let inherent_data_providers = sp_inherents::InherentDataProviders::new();
 
 		let builder = sc_service::ServiceBuilder::new_full::<
@@ -48,35 +47,20 @@ macro_rules! new_full_start {
 				let maintainable_pool = sp_transaction_pool::MaintainableTransactionPool::new(pool, maintainer);
 				Ok(maintainable_pool)
 			})?
-			.with_import_queue(|_config, client, mut select_chain, transaction_pool| {
-				let select_chain = select_chain.take()
-					.ok_or_else(|| sc_service::Error::SelectChainRequired)?;
-
-				let (grandpa_block_import, grandpa_link) =
-					grandpa::block_import::<_, _, _, runtime::RuntimeApi, _>(
-						client.clone(), &*client, select_chain
-					)?;
-
-				let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-					grandpa_block_import.clone(), client.clone(),
-				);
-
-				let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _>(
-					sc_consensus_aura::SlotDuration::get_or_compute(&*client)?,
-					aura_block_import,
-					Some(Box::new(grandpa_block_import.clone())),
-					None,
-					client,
+			.with_import_queue(|_config, client, select_chain, _transaction_pool| {
+				let import_queue = sc_consensus_pow::import_queue(
+					Box::new(client.clone()),
+					client.clone(),
+					crate::pow::Sha3Algorithm,
+					0,
+					select_chain,
 					inherent_data_providers.clone(),
-					Some(transaction_pool),
 				)?;
-
-				import_setup = Some((grandpa_block_import, grandpa_link));
 
 				Ok(import_queue)
 			})?;
 
-		(builder, import_setup, inherent_data_providers)
+		(builder, inherent_data_providers)
 	}}
 }
 
@@ -85,20 +69,14 @@ pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisCon
 	-> Result<impl AbstractService, ServiceError>
 {
 	let is_authority = config.roles.is_authority();
-	let force_authoring = config.force_authoring;
 	let name = config.name.clone();
-	let disable_grandpa = config.disable_grandpa;
 
 	// sentry nodes announce themselves as authorities to the network
 	// and should run the same protocols authorities do, but it should
 	// never actively participate in any consensus process.
 	let participates_in_consensus = is_authority && !config.sentry_mode;
 
-	let (builder, mut import_setup, inherent_data_providers) = new_full_start!(config);
-
-	let (block_import, grandpa_link) =
-		import_setup.take()
-			.expect("Link Half and Block Import are present for Full Services or setup failed before. qed");
+	let (builder, inherent_data_providers) = new_full_start!(config);
 
 	let service = builder.with_network_protocol(|_| Ok(NodeProtocol::new()))?
 		.with_finality_proof_provider(|_client, _backend|
