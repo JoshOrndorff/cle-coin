@@ -58,7 +58,7 @@ impl<B: BlockT<Hash=H256>> PowAlgorithm<B> for Sha3Algorithm {
 	fn difficulty(&self, parent: &BlockId<B>) -> Result<Self::Difficulty, Error<B>> {
 		//TODO Call into runtime API to get the on-chain value
 		// See kulupu for example
-		Ok(U256::from(100000))
+		Ok(U256::from(1_000))
 	}
 
 	fn verify(
@@ -107,7 +107,7 @@ impl<B: BlockT<Hash=H256>> PowAlgorithm<B> for Sha3Algorithm {
 		// Loop the specified number of times
 		for _ in 0..round {
 			// Artificially throttle the mining
-			std::thread::sleep(Duration::new(0, 100_000_000));
+			std::thread::sleep(Duration::new(0, 1_000_000));
 
 			// Choose a new nonce
 			let nonce = H256::random_using(&mut rng);

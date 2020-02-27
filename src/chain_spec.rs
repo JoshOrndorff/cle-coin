@@ -119,7 +119,7 @@ fn testnet_genesis(
 			key: root_key,
 		}),
 		pow_params: Some(PowParamsConfig {
-			difficulty: 200.into(),
+			difficulty: 1000.into(),
 			reward: 100,
 		}),
 	}
