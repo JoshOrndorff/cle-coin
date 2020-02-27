@@ -140,5 +140,5 @@ version = '2.0.0'
 members = ['runtime']
 
 [[bin]]
-name = 'node-template'
+name = 'cle-coin'
 path = 'src/main.rs'

@@ -13,12 +13,12 @@ pub use sc_cli::{VersionInfo, IntoExit, error};
 
 fn main() -> Result<(), cli::error::Error> {
 	let version = VersionInfo {
-		name: "Substrate Node",
+		name: "CLE Coin",
 		commit: env!("VERGEN_SHA_SHORT"),
 		version: env!("CARGO_PKG_VERSION"),
-		executable_name: "node-template",
-		author: "Anonymous",
-		description: "Template Node",
+		executable_name: "cle-coin",
+		author: "Joshy Orndorff",
+		description: "CLE Coin",
 		support_url: "support.anonymous.an",
 	};
 

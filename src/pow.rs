@@ -107,7 +107,7 @@ impl<B: BlockT<Hash=H256>> PowAlgorithm<B> for Sha3Algorithm {
 		// Loop the specified number of times
 		for _ in 0..round {
 			// Artificially throttle the mining
-			// std::thread::sleep(Duration::new(0, 200_000_000));
+			std::thread::sleep(Duration::new(0, 100_000_000));
 
 			// Choose a new nonce
 			let nonce = H256::random_using(&mut rng);
