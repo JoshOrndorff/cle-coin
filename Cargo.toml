@@ -28,6 +28,7 @@ rand = { version = "0.7", features = ["small_rng"] }
 sc-consensus-pow = { git = "https://github.com/paritytech/substrate", rev = '3e651110aa06aa835790df63410a29676243fc54' }
 sp-consensus-pow = { git = "https://github.com/paritytech/substrate", rev = '3e651110aa06aa835790df63410a29676243fc54' }
 serde_json = "1.0"
+structopt = "0.3"
 
 [dependencies.codec]
 package = 'parity-scale-codec'
@@ -113,7 +114,6 @@ rev = '3e651110aa06aa835790df63410a29676243fc54'
 [dependencies.sp-consensus]
 git = 'https://github.com/paritytech/substrate.git'
 rev = '3e651110aa06aa835790df63410a29676243fc54'
-version = '0.8'
 
 [dependencies.sp-consensus-aura]
 git = 'https://github.com/paritytech/substrate.git'

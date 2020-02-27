@@ -3,7 +3,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 use sc_client::LongestChain;
-use runtime::{self, GenesisConfig, opaque::Block, RuntimeApi};
+use runtime::{self, GenesisConfig, opaque::Block, RuntimeApi, AccountId};
 use sc_service::{error::{Error as ServiceError}, AbstractService, Configuration, ServiceBuilder};
 use sp_inherents::InherentDataProviders;
 use sc_network::{config::DummyFinalityProofRequestBuilder, construct_simple_protocol};
@@ -13,6 +13,7 @@ use sp_consensus_aura::sr25519::{AuthorityPair as AuraPair};
 use grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
 use sc_basic_authority;
 use crate::pow::Sha3Algorithm;
+use sp_core::H256;
 
 // Our native executor instance.
 native_executor_instance!(
@@ -26,15 +27,33 @@ construct_simple_protocol! {
 	pub struct NodeProtocol where Block = Block { }
 }
 
-pub fn cle_coin_inherent_data_providers() -> Result<InherentDataProviders, ServiceError> {
+pub fn cle_coin_inherent_data_providers(author: Option<&str>) -> Result<InherentDataProviders, ServiceError> {
 	let providers = InherentDataProviders::new();
 
+	// Register the timestamp inherent data provider
 	// if !providers.has_provider(&sp_timestamp::INHERENT_IDENTIFIER) {
 	// 	providers
 	// 		.register_provider(sp_timestamp::InherentDataProvider)
 	// 		.map_err(Into::into)
 	// 		.map_err(sp_consensus::error::Error::InherentData)?;
 	// }
+
+	// Register the author inherent data provider
+	if let Some(author) = author {
+		if !providers.has_provider(&runtime::pow_params::INHERENT_IDENTIFIER) {
+			providers
+				.register_provider(runtime::pow_params::InherentDataProvider(
+					AccountId::from_h256(H256::from_str(if author.starts_with("0x") {
+						&author[2..]
+					} else {
+						author
+					}).expect("Invalid author account")).encode()
+				))
+				.map_err(Into::into)
+				.map_err(sp_consensus::Error::InherentData)?;
+		}
+	}
+
 
 	Ok(providers)
 }
@@ -44,8 +63,8 @@ pub fn cle_coin_inherent_data_providers() -> Result<InherentDataProviders, Servi
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
 macro_rules! new_full_start {
-	($config:expr) => {{
-		let inherent_data_providers = crate::service::cle_coin_inherent_data_providers()?;
+	($config:expr, $author:expr) => {{
+		let inherent_data_providers = crate::service::cle_coin_inherent_data_providers($author)?;
 
 		let builder = sc_service::ServiceBuilder::new_full::<
 			runtime::opaque::Block, runtime::RuntimeApi, crate::service::Executor
@@ -78,7 +97,7 @@ macro_rules! new_full_start {
 }
 
 /// Builds a new service for a full client.
-pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisConfig>)
+pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisConfig>, author: Option<&str>)
 	-> Result<impl AbstractService, ServiceError>
 {
 	let is_authority = config.roles.is_authority();
@@ -89,7 +108,7 @@ pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisCon
 	// never actively participate in any consensus process.
 	let participates_in_consensus = is_authority && !config.sentry_mode;
 
-	let (builder, inherent_data_providers) = new_full_start!(config);
+	let (builder, inherent_data_providers) = new_full_start!(config, author);
 
 	let service = builder.with_network_protocol(|_| Ok(NodeProtocol::new()))?
 		.with_finality_proof_provider(|_client, _backend|
@@ -127,10 +146,10 @@ pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisCon
 }
 
 /// Builds a new service for a light client.
-pub fn new_light<C: Send + Default + 'static>(config: Configuration<C, GenesisConfig>)
+pub fn new_light<C: Send + Default + 'static>(config: Configuration<C, GenesisConfig>, author: Option<&str>)
 	-> Result<impl AbstractService, ServiceError>
 {
-	let inherent_data_providers = cle_coin_inherent_data_providers()?;
+	let inherent_data_providers = cle_coin_inherent_data_providers(author)?;
 
 	ServiceBuilder::new_light::<Block, RuntimeApi, Executor>(config)?
 		.with_select_chain(|_config, backend| {

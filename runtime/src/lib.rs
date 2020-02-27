@@ -60,7 +60,7 @@ pub type Hash = sp_core::H256;
 /// Digest item type.
 pub type DigestItem = generic::DigestItem<Hash>;
 
-mod pow_params;
+pub mod pow_params;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
 /// the specifics of the runtime. They can then be made to be agnostic over specific formats
@@ -234,7 +234,7 @@ construct_runtime!(
 		TransactionPayment: transaction_payment::{Module, Storage},
 		Sudo: sudo,
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
-		PowParams: pow_params::{Module, Call, Storage, Event<T>, Config<T>},
+		PowParams: pow_params::{Module, Call, Storage, Event<T>, Config<T>, Inherent},
 	}
 );
 
