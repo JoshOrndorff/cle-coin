@@ -19,7 +19,7 @@ type BalanceOf<T> = <<T as Trait>::RewardCurrency as Currency<<T as system::Trai
 
 decl_storage! {
 	trait Store for Module<T: Trait> as TemplateModule {
-		Difficulty get(fn difficulty) config(): U256 = 1000.into();
+		Difficulty get(fn difficulty) config(): U256 = 5000.into();
 		Reward get(fn reward) config(): BalanceOf<T> = 1.into();
 	}
 }
