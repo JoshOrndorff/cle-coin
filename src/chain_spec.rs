@@ -89,8 +89,7 @@ impl Alternative {
 				// Enable Println
 				true),
 				// Bootnodes
-				vec!["/dns4/cleveland.bootnodes.net/tcp/30333/p2p/QmPQwJBLMZTsJxFC4AFEGAiXSN9R49aJ8B2UNE6FaLdhFd
-".to_string()],
+				vec!["/dns4/cleveland.bootnodes.net/tcp/30333/p2p/QmPQwJBLMZTsJxFC4AFEGAiXSN9R49aJ8B2UNE6FaLdhFd".to_string()],
 				// Telemetry Endpoints
 				Some(TelemetryEndpoints::new(vec![
 					(STAGING_TELEMETRY_URL.to_string(), 1),
