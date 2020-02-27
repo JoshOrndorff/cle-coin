@@ -26,13 +26,26 @@ construct_simple_protocol! {
 	pub struct NodeProtocol where Block = Block { }
 }
 
+pub fn cle_coin_inherent_data_providers() -> Result<InherentDataProviders, ServiceError> {
+	let providers = InherentDataProviders::new();
+
+	if !providers.has_provider(&sp_timestamp::INHERENT_IDENTIFIER) {
+		providers
+			.register_provider(sp_timestamp::InherentDataProvider)
+			.map_err(Into::into)
+			.map_err(sp_consensus::error::Error::InherentData)?;
+	}
+
+	Ok(providers)
+}
+
 /// Starts a `ServiceBuilder` for a full service.
 ///
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
 macro_rules! new_full_start {
 	($config:expr) => {{
-		let inherent_data_providers = sp_inherents::InherentDataProviders::new();
+		let inherent_data_providers = crate::service::cle_coin_inherent_data_providers()?;
 
 		let builder = sc_service::ServiceBuilder::new_full::<
 			runtime::opaque::Block, runtime::RuntimeApi, crate::service::Executor
@@ -117,7 +130,7 @@ pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisCon
 pub fn new_light<C: Send + Default + 'static>(config: Configuration<C, GenesisConfig>)
 	-> Result<impl AbstractService, ServiceError>
 {
-	let inherent_data_providers = InherentDataProviders::new();
+	let inherent_data_providers = cle_coin_inherent_data_providers()?;
 
 	ServiceBuilder::new_light::<Block, RuntimeApi, Executor>(config)?
 		.with_select_chain(|_config, backend| {

@@ -35,6 +35,7 @@ dependencies = [
  "sp-inherents 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "sp-io 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "sp-runtime 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
+ "sp-timestamp 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "sp-transaction-pool 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "substrate-build-script-utils 2.0.0 (git+https://github.com/paritytech/substrate.git?rev=3e651110aa06aa835790df63410a29676243fc54)",
  "tokio 0.1.22 (registry+https://github.com/rust-lang/crates.io-index)",
