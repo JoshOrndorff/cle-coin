@@ -29,12 +29,12 @@ construct_simple_protocol! {
 pub fn cle_coin_inherent_data_providers() -> Result<InherentDataProviders, ServiceError> {
 	let providers = InherentDataProviders::new();
 
-	if !providers.has_provider(&sp_timestamp::INHERENT_IDENTIFIER) {
-		providers
-			.register_provider(sp_timestamp::InherentDataProvider)
-			.map_err(Into::into)
-			.map_err(sp_consensus::error::Error::InherentData)?;
-	}
+	// if !providers.has_provider(&sp_timestamp::INHERENT_IDENTIFIER) {
+	// 	providers
+	// 		.register_provider(sp_timestamp::InherentDataProvider)
+	// 		.map_err(Into::into)
+	// 		.map_err(sp_consensus::error::Error::InherentData)?;
+	// }
 
 	Ok(providers)
 }

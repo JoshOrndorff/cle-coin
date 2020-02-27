@@ -164,16 +164,16 @@ impl indices::Trait for Runtime {
 	type Event = Event;
 }
 
-parameter_types! {
-	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
-}
-
-impl timestamp::Trait for Runtime {
-	/// A timestamp: milliseconds since the unix epoch.
-	type Moment = u64;
-	type OnTimestampSet = ();
-	type MinimumPeriod = MinimumPeriod;
-}
+// parameter_types! {
+// 	pub const MinimumPeriod: u64 = SLOT_DURATION / 2;
+// }
+//
+// impl timestamp::Trait for Runtime {
+// 	/// A timestamp: milliseconds since the unix epoch.
+// 	type Moment = u64;
+// 	type OnTimestampSet = ();
+// 	type MinimumPeriod = MinimumPeriod;
+// }
 
 parameter_types! {
 	pub const ExistentialDeposit: u128 = 500;
@@ -228,7 +228,7 @@ construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic
 	{
 		System: system::{Module, Call, Storage, Config, Event},
-		Timestamp: timestamp::{Module, Call, Storage, Inherent},
+		// Timestamp: timestamp::{Module, Call, Storage, Inherent},
 		Indices: indices,
 		Balances: balances,
 		TransactionPayment: transaction_payment::{Module, Storage},
@@ -330,11 +330,11 @@ impl_runtime_apis! {
 		}
 	}
 
-	impl sp_consensus_pow::TimestampApi<Block, u64> for Runtime {
-		fn timestamp() -> u64 {
-			timestamp::Module::<Runtime>::get()
-		}
-	}
+	// impl sp_consensus_pow::TimestampApi<Block, u64> for Runtime {
+	// 	fn timestamp() -> u64 {
+	// 		timestamp::Module::<Runtime>::get()
+	// 	}
+	// }
 
 	impl sp_consensus_pow::DifficultyApi<Block, U256> for Runtime {
 		fn difficulty() -> U256 {
