@@ -5,9 +5,11 @@ use runtime::{
 };
 use sc_service;
 use sp_runtime::traits::{Verify, IdentifyAccount};
+use serde_json::json;
+use sc_telemetry::TelemetryEndpoints;
 
 // Note this is the URL for the telemetry server
-//const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
+const STAGING_TELEMETRY_URL: &str = "wss://telemetry.polkadot.io/submit/";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::ChainSpec<GenesisConfig>;
@@ -62,10 +64,14 @@ impl Alternative {
 				None
 			),
 			Alternative::LocalTestnet => ChainSpec::from_genesis(
-				"Local Testnet",
-				"local_testnet",
+				// Name
+				"CLE Coin Mainnet",
+				// id
+				"cle_coin",
 				|| testnet_genesis(
+				// Root Key
 				get_account_id_from_seed::<sr25519::Public>("Alice"),
+				// Endowed Accounts
 				vec![
 					get_account_id_from_seed::<sr25519::Public>("Alice"),
 					get_account_id_from_seed::<sr25519::Public>("Bob"),
@@ -80,11 +86,24 @@ impl Alternative {
 					get_account_id_from_seed::<sr25519::Public>("Eve//stash"),
 					get_account_id_from_seed::<sr25519::Public>("Ferdie//stash"),
 				],
+				// Enable Println
 				true),
+				// Bootnodes
 				vec![],
-				None,
-				None,
-				None,
+				// Telemetry Endpoints
+				Some(TelemetryEndpoints::new(vec![
+					(STAGING_TELEMETRY_URL.to_string(), 1),
+				])),
+				// Protocol ID
+				Some("cle"),
+				// Properties
+				// This seems to not be working. https://substrate.dev/rustdocs/pre-v2.0-3e65111/sc_chain_spec/type.Properties.html
+				// I copied it from kulupu
+				Some(json!({
+					"tokenDecimals": 12,
+					"tokenSymbol": "CLE"
+				}).as_object().expect("Created an object").clone()),
+				// Extensions
 				None
 			),
 		})
@@ -93,6 +112,7 @@ impl Alternative {
 	pub(crate) fn from(s: &str) -> Option<Self> {
 		match s {
 			"dev" => Some(Alternative::Development),
+			// Empty string means local testnet. It's our default.
 			"" | "local" => Some(Alternative::LocalTestnet),
 			_ => None,
 		}
