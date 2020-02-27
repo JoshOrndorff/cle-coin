@@ -51,7 +51,7 @@ macro_rules! new_full_start {
 				let import_queue = sc_consensus_pow::import_queue(
 					Box::new(client.clone()),
 					client.clone(),
-					crate::pow::Sha3Algorithm,
+					crate::pow::Sha3Algorithm::new(client.clone()),
 					0,
 					select_chain,
 					inherent_data_providers.clone(),
@@ -99,7 +99,7 @@ pub fn new_full<C: Send + Default + 'static>(config: Configuration<C, GenesisCon
 		sc_consensus_pow::start_mine(
 			Box::new(service.client().clone()),
 			service.client(),
-			Sha3Algorithm,
+			Sha3Algorithm::new(service.client().clone()),
 			proposer,
 			None,
 			rounds,
@@ -139,7 +139,7 @@ pub fn new_light<C: Send + Default + 'static>(config: Configuration<C, GenesisCo
 			let import_queue = sc_consensus_pow::import_queue(
 				Box::new(client.clone()),
 				client.clone(),
-				Sha3Algorithm,
+				Sha3Algorithm::new(client.clone()),
 				0,
 				select_chain,
 				inherent_data_providers.clone(),

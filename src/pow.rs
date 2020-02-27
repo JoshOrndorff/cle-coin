@@ -1,16 +1,30 @@
+use std::sync::Arc;
 use sp_core::{U256, H256};
 use sp_runtime::generic::BlockId;
 use sp_runtime::traits::{
 	Block as BlockT, ProvideRuntimeApi, UniqueSaturatedInto,
 };
+use sp_blockchain::HeaderBackend;
+use sc_client_api::backend::AuxStore;
 use codec::{Encode, Decode};
 use sc_consensus_pow::{PowAlgorithm, Error};
 use sp_consensus_pow::Seal as RawSeal;
 use sha3::{Sha3_256, Digest};
 use rand::{thread_rng, SeedableRng, rngs::SmallRng};
 use std::time::Duration;
+use sp_consensus_pow::DifficultyApi;
 
-pub struct Sha3Algorithm;
+/// Specific PoW Algorithm that uses Sha3 hashing.
+/// Needs a reference to the client so it can grab the difficulty from the runtime.
+pub struct Sha3Algorithm<C> {
+	client: Arc<C>,
+}
+
+impl<C> Sha3Algorithm<C> {
+	pub fn new(client: Arc<C>) -> Self {
+		Self { client }
+	}
+}
 
 /// Determine whether the given hash satisfies the given difficulty.
 /// The test is done by multiplying the two together. If the product
@@ -52,18 +66,22 @@ impl Compute {
 	}
 }
 
-impl<B: BlockT<Hash=H256>> PowAlgorithm<B> for Sha3Algorithm {
+impl<B: BlockT<Hash=H256>, C> PowAlgorithm<B> for Sha3Algorithm<C> where
+	C: HeaderBackend<B> + AuxStore + ProvideRuntimeApi,
+	C::Api: DifficultyApi<B, U256>,
+{
 	type Difficulty = U256;
 
 	fn difficulty(&self, parent: &BlockId<B>) -> Result<Self::Difficulty, Error<B>> {
-		//TODO Call into runtime API to get the on-chain value
-		// See kulupu for example
-		Ok(U256::from(1_000))
+		self.client.runtime_api().difficulty(parent)
+			.map_err(|e| sc_consensus_pow::Error::Environment(
+				format!("Fetching difficulty from runtime failed: {:?}", e)
+			))
 	}
 
 	fn verify(
 		&self,
-		parent: &BlockId<B>,
+		_parent: &BlockId<B>,
 		pre_hash: &H256,
 		seal: &RawSeal,
 		difficulty: Self::Difficulty
@@ -95,7 +113,7 @@ impl<B: BlockT<Hash=H256>> PowAlgorithm<B> for Sha3Algorithm {
 
 	fn mine(
 		&self,
-		parent: &BlockId<B>,
+		_parent: &BlockId<B>,
 		pre_hash: &H256,
 		difficulty: Self::Difficulty,
 		round: u32 // The number of nonces to try suring this call
