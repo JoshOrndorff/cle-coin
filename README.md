@@ -11,7 +11,7 @@ As an end-user of the network, the easiest way to begin is by launching the [hos
 ### Download Binaries
 
 * [Linux](https://cleveland.bootnodes.net/cle-coin)
-* Mac - TODO
+* [Mac](https://cleveland.bootnodes.net/cle-coin-osx)
 * [Windows](https://cleveland.bootnodes.net/cle-coin.exe) (experimental)
 
 ### Build it Yourself
