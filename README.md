@@ -10,9 +10,9 @@ As an end-user of the network, the easiest way to begin is by launching the [hos
 
 ### Download Binaries
 
-[Linux](https://cleveland.bootnodes.net/cle-coin)
-Mac - TODO
-[Windows](https://cleveland.bootnodes.net/cle-coin.exe) (experimental)
+* [Linux](https://cleveland.bootnodes.net/cle-coin)
+* Mac - TODO
+* [Windows](https://cleveland.bootnodes.net/cle-coin.exe) (experimental)
 
 ### Build it Yourself
 You can also build the node yourself. This is the most well-trodden path, but has some prerequisites and takes some disk space.
